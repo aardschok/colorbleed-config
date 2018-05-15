@@ -79,8 +79,36 @@ class VrayRenderSlave(api.Action):
                           environment=env)
 
 
+class FilePublisher(api.Action):
+
+    name = "filepublisher"
+    label = "File Publisher"
+    icon = "filter"
+    order = 998
+
+    def is_compatible(self, session):
+        required = ["AVALON_PROJECT", "AVALON_SILO", "AVALON_ASSET"]
+        if not all(x for x in required if x in session):
+            return False
+        return True
+
+    def process(self, session, **kwargs):
+        import os
+
+        env = os.environ.copy()
+        env.update(session)
+
+        try:
+            return lib.launch(executable="python",
+                              args=["-m", "filepublisher"],
+                              environment=env)
+        except Exception as exc:
+            print(exc)
+
+
 def register_launcher_actions():
     """Register specific actions which should be accessible in the launcher"""
 
     pipeline.register_plugin(api.Action, FusionRenderNode)
     pipeline.register_plugin(api.Action, VrayRenderSlave)
+    pipeline.register_plugin(api.Action, FilePublisher)
