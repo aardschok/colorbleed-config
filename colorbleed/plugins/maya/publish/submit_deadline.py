@@ -194,36 +194,22 @@ class MayaSubmitDeadline(pyblish.api.InstancePlugin):
             "AuxFiles": []
         }
 
-        # Include critical environment variables with submission
-        keys = [
-            # This will trigger `userSetup.py` on the slave
-            # such that proper initialisation happens the same
-            # way as it does on a local machine.
-            # TODO(marcus): This won't work if the slaves don't
-            # have accesss to these paths, such as if slaves are
-            # running Linux and the submitter is on Windows.
-            "PYTHONPATH",
+        # Collects tools setup
+        TOOL_ENV = os.getenv("TOOL_ENV")
+        assert TOOL_ENV, "No environment directory found"
+        AVALON_TOOLS = os.getenv("AVALON_TOOLS")
+        assert AVALON_TOOLS, "No environment setup found"
 
-            # todo: This is a temporary fix for yeti variables
-            "PEREGRINEL_LICENSE",
-            "REDSHIFT_MAYAEXTENSIONSPATH",
-            "VRAY_FOR_MAYA2018_PLUGINS_X64",
-            "VRAY_PLUGINS_X64",
-            "VRAY_USE_THREAD_AFFINITY",
-            "MAYA_MODULE_PATH"
-        ]
-        environment = dict({key: os.environ[key] for key in keys
-                            if key in os.environ}, **api.Session)
+        env = api.Session.copy()
+        env["AVALON_TOOLS"] = AVALON_TOOLS
+        env["TOOL_ENV"] = TOOL_ENV
 
-        PATHS = os.environ["PATH"].split(";")
-        environment["PATH"] = ";".join([p for p in PATHS
-                                        if p.startswith("P:")])
-
+        # Ingest session in job environment
         payload["JobInfo"].update({
             "EnvironmentKeyValue%d" % index: "{key}={value}".format(
                 key=key,
-                value=environment[key]
-            ) for index, key in enumerate(environment)
+                value=env[key]
+            ) for index, key in enumerate(env)
         })
 
         # Include optional render globals

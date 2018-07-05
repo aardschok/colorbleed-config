@@ -116,23 +116,22 @@ class FusionSubmitDeadline(pyblish.api.InstancePlugin):
             payload["JobInfo"]["OutputDirectory%d" % index] = folder
             payload["JobInfo"]["OutputFilename%d" % index] = filename
 
-        # Include critical variables with submission
-        keys = [
-            # TODO: This won't work if the slaves don't have accesss to
-            # these paths, such as if slaves are running Linux and the
-            # submitter is on Windows.
-            "PYTHONPATH",
-            "OFX_PLUGIN_PATH",
-            "FUSION9_MasterPrefs"
-        ]
-        environment = dict({key: os.environ[key] for key in keys
-                            if key in os.environ}, **api.Session)
+        # Collects tools setup
+        TOOL_ENV = os.getenv("TOOL_ENV")
+        assert TOOL_ENV, "No environment directory found"
+        AVALON_TOOLS = os.getenv("AVALON_TOOLS")
+        assert AVALON_TOOLS, "No environment setup found"
 
+        env = api.Session.copy()
+        env["AVALON_TOOLS"] = AVALON_TOOLS
+        env["TOOL_ENV"] = TOOL_ENV
+
+        # Ingest session in job environment
         payload["JobInfo"].update({
             "EnvironmentKeyValue%d" % index: "{key}={value}".format(
                 key=key,
-                value=environment[key]
-            ) for index, key in enumerate(environment)
+                value=env[key]
+            ) for index, key in enumerate(env)
         })
 
         self.log.info("Submitting..")
