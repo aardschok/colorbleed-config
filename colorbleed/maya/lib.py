@@ -312,6 +312,56 @@ def attribute_values(attr_values):
 
 
 @contextlib.contextmanager
+def break_connections(items, source=True, destination=False):
+    """Disconnect source and / or destination connections of node
+
+    Args:
+        items(list): list of nodes or attribute (node.attr)
+        source(bool): if set True, get all source connections
+        destination(bool): if set True, get all destination connections
+
+    Returns:
+        None
+
+    """
+
+    inputs = list()
+    outputs = list()
+    if source:
+        inputs = cmds.listConnections(items,
+                                      source=True,
+                                      destination=False,
+                                      connections=True,
+                                      plugs=True) or []
+
+    if destination:
+        outputs = cmds.listConnections(items,
+                                       source=False,
+                                       destination=True,
+                                       connections=True,
+                                       plugs=True) or []
+
+    # Pair connections
+    input_connections = list(lib.grouper(inputs, 2))
+    output_connections = list(lib.grouper(outputs, 2))
+
+    try:
+        for input_a, input_b in input_connections:
+            cmds.disconnectAttr(input_a, input_b)
+
+        for output_a, output_b in output_connections:
+            cmds.disconnectAttr(output_a, output_b)
+
+        yield
+    finally:
+        for input_a, input_b in input_connections:
+            cmds.connectAttr(input_a, input_b)
+
+        for output_a, output_b in output_connections:
+            cmds.connectAttr(output_a, output_b)
+
+
+@contextlib.contextmanager
 def keytangent_default(in_tangent_type='auto',
                        out_tangent_type='auto'):
     """Set the default keyTangent for new keys during this context"""
