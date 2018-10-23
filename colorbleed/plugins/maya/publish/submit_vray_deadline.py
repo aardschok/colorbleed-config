@@ -144,7 +144,8 @@ class VraySubmitDeadline(pyblish.api.InstancePlugin):
                 "Frames": "{}-{}".format(start_frame, end_frame),
 
                 "Plugin": "Vray",
-                "OverrideTaskExtraInfoNames": False
+                "OverrideTaskExtraInfoNames": False,
+                "OutputDirectory0": instance.context.data["workspaceDir"]
             },
             "PluginInfo": {
 
