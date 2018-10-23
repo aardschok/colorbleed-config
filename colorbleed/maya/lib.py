@@ -1930,10 +1930,10 @@ def bake_to_world_space(nodes,
 
         return valid_attrs
 
-    transform_attrs = set(["t", "r", "s",
-                           "tx", "ty", "tz",
-                           "rx", "ry", "rz",
-                           "sx", "sy", "sz"])
+    transform_attrs = {"t", "r", "s",
+                       "tx", "ty", "tz",
+                       "rx", "ry", "rz",
+                       "sx", "sy", "sz"}
 
     world_space_nodes = []
     with delete_after() as delete_bin:
