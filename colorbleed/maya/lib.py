@@ -432,25 +432,6 @@ def empty_sets(sets, force=False):
             cmds.sets(members, forceElement=origin_set)
 
 
-@contextlib.contextmanager
-def renderlayer(layer):
-    """Set the renderlayer during the context
-
-    Arguments:
-        layer (str): Name of layer to switch to.
-
-    """
-
-    original = cmds.editRenderLayerGlobals(query=True,
-                                           currentRenderLayer=True)
-
-    try:
-        cmds.editRenderLayerGlobals(currentRenderLayer=layer)
-        yield
-    finally:
-        cmds.editRenderLayerGlobals(currentRenderLayer=original)
-
-
 class delete_after(object):
     """Context Manager that will delete collected nodes after exit.
 
